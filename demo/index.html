@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>panda-forms demo</title>
+  <style>
+    body { font-family: ui-sans-serif, system-ui, sans-serif; background: #f3f4f6; margin: 0; color: #111827; }
+    .config { max-width: 42rem; margin: 2rem auto 0; background: #fff; padding: 1.25rem 1.5rem;
+      border-radius: .5rem; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+    .config h2 { margin: 0 0 .75rem; font-size: 1.1rem; }
+    .row { display: flex; gap: 1rem; align-items: center; margin-bottom: .75rem; flex-wrap: wrap; }
+    label.opt { display: flex; align-items: center; gap: .4rem; font-size: .85rem; }
+    #fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: .3rem;
+      max-height: 220px; overflow: auto; border: 1px solid #e5e7eb; padding: .5rem; border-radius: .375rem; }
+    button { padding: .5rem 1rem; border: none; border-radius: .375rem; background: #111827; color: #fff;
+      font-weight: 600; cursor: pointer; }
+    .log { max-width: 42rem; margin: 1rem auto; font-family: ui-monospace, monospace; font-size: .75rem;
+      color: #374151; background: #fff; border-radius: .5rem; padding: 1rem; max-height: 200px; overflow: auto; }
+  </style>
+</head>
+<body>
+  <div class="config">
+    <h2>panda-forms — live config</h2>
+    <div class="row">
+      <label class="opt"><input type="radio" name="form" value="pledge" checked /> Pledge (cards)</label>
+      <label class="opt"><input type="radio" name="form" value="dynamic" /> Dynamic (dropdowns)</label>
+      <button id="apply">Render form</button>
+    </div>
+    <p style="font-size:.8rem;color:#6b7280;margin:.25rem 0 .5rem;">Pick the fields to include:</p>
+    <div id="fields"></div>
+  </div>
+
+  <div id="mount"></div>
+  <div class="log" id="log">telemetry events will appear here (endpoint is stubbed in this demo)…</div>
+
+  <script src="../dist/panda-forms.umd.js"></script>
+  <script>
+    const logEl = document.getElementById('log');
+    const fieldsEl = document.getElementById('fields');
+    let current = null;
+
+    function renderFieldChecklist(form) {
+      fieldsEl.innerHTML = '';
+      PandaForm.listFields(form).forEach((f) => {
+        const l = document.createElement('label');
+        l.className = 'opt';
+        l.innerHTML = `<input type="checkbox" value="${f.key}" checked ${f.always ? 'disabled' : ''}/> ${f.label}${f.always ? ' (always)' : ''}`;
+        fieldsEl.appendChild(l);
+      });
+    }
+
+    function selectedForm() {
+      return document.querySelector('input[name="form"]:checked').value;
+    }
+
+    function selectedFields() {
+      return [...fieldsEl.querySelectorAll('input:checked')].map((i) => i.value);
+    }
+
+    function apply() {
+      if (current) current.destroy();
+      document.getElementById('mount').innerHTML = '';
+      current = PandaForm.mount('#mount', {
+        form: selectedForm(),
+        fields: selectedFields(),
+        endpoint: '',                 // demo: telemetry POSTs 404 harmlessly
+        onEvent(kind, data) {
+          const line = document.createElement('div');
+          line.textContent = `[${kind}] ${data.fieldId} ${data.reactionMs}ms (${data.eventType})`;
+          logEl.appendChild(line);
+          logEl.scrollTop = logEl.scrollHeight;
+        },
+        onSubmit(values) {
+          logEl.appendChild(Object.assign(document.createElement('div'),
+            { textContent: '[submit] ' + JSON.stringify(values) }));
+        },
+      });
+    }
+
+    document.querySelectorAll('input[name="form"]').forEach((r) =>
+      r.addEventListener('change', () => renderFieldChecklist(selectedForm())));
+    document.getElementById('apply').addEventListener('click', apply);
+
+    renderFieldChecklist('pledge');
+    apply();
+  </script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+{
+  "name": "panda-forms",
+  "version": "0.1.0",
+  "description": "Embeddable progressive-disclosure research forms (pledge & dynamic) with configurable fields and reveal-timing + interaction telemetry.",
+  "type": "module",
+  "main": "./dist/panda-forms.umd.js",
+  "module": "./dist/panda-forms.esm.js",
+  "browser": "./dist/panda-forms.umd.js",
+  "unpkg": "./dist/panda-forms.umd.js",
+  "exports": {
+    ".": {
+      "import": "./dist/panda-forms.esm.js",
+      "require": "./dist/panda-forms.umd.js",
+      "default": "./dist/panda-forms.umd.js"
+    },
+    "./server": {
+      "require": "./server.cjs",
+      "default": "./server.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "server.cjs",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "express": ">=4"
+  },
+  "peerDependenciesMeta": {
+    "express": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "build": "node build.js",
+    "dev": "node build.js --watch",
+    "prepublishOnly": "node build.js"
+  },
+  "keywords": [
+    "form",
+    "progressive-disclosure",
+    "telemetry",
+    "reaction-timing",
+    "research",
+    "embeddable"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.27.2"
+  }
+}
